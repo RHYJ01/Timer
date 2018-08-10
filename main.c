@@ -6,19 +6,42 @@
 #include <stdlib.h>
 #include <avr/interrupt.h>
 
-volatile uint8_t val=0;
+volatile uint8_t ms_100=0;
+volatile uint8_t sek=0;
+volatile uint8_t min=0;
+volatile uint8_t h=0;
 
 ISR(TIMER0_OVF_vect)
 {
 	static uint8_t ISR_zaehler=0;
 	
 	TCNT0 = 0;
-	ISR_zaehler++;
+	ISR_zaehler++;//zähler hochrechnen
 	if(ISR_zaehler==12)
 	{
-		ISR_zaehler=0;
+		ms_100++; //milisekunden hochrechnen
+		
+		if(ms_100==10)
+		{
+			sek++; //sekunden hochrechnen
+			ms_100=0; //milisekunden auf 0 setzen
+		}
+		
+		if(sek==60)
+		{
+			min++; //minuten hochrechnen
+			sek=0; //sekunden auf 0 setzen
+		}
+		
+		if(min==60)
+		{
+			h++; //stunden hochrechnen
+			min=0; //minuten auf 0 setzen
+		}
+		
+		ISR_zaehler=0; //zähler auf 0 setzen
 	}
-	val++;
+	
 }
 
 
@@ -37,7 +60,7 @@ int main(void)
 	while(1)
 	{
 		
-		PORTB=val;
+		PORTB=min; //ausgabe der minuten auf Port B
 	}
 	
 } //end of main
